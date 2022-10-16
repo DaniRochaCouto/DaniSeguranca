@@ -36,11 +36,11 @@ async function getAllProducts(){
 async function getProductById(id){
     const conn = await connect();
     
-    const query = `SELECT * FROM products WHERE id = "${id}";`;
+    const query = `SELECT * FROM products WHERE id = ?;`;
+    
+    
+    const [rows, fields] = await connection.execute(query, [id]);
     console.log(`Executando query: ${query}`);
-    
-    const [rows, fields] = await connection.execute(query);
-    
     
     return rows;
 
@@ -52,12 +52,15 @@ async function updateProductById(id, name, description, value){
     try{
         const conn = await connect();
     
-        const query = `UPDATE products SET name = "${name}", description = "${description}", value = ${value} WHERE id = "${id}";`;
-        console.log(`Executando query: ${query}`);
+        const query = `UPDATE products SET name = ?, description = ?, value = ? WHERE id = ?;`;
         
-        const [rows] = await conn.execute(query);
+        
+        const [rows] = await conn.execute(query,[name, description, value, id]);
+        
+        console.log(`Executando query: ${query}`);
         return rows;
     }catch(err){
+        console.log("Retorno SQL: " + JSON.stringify(err));
         throw {code: 500, message: 'Erro inesperado ao tentar cadastrar usuário'};
     }
 }
@@ -65,20 +68,20 @@ async function updateProductById(id, name, description, value){
 async function deleteProductById(id){
     const conn = await connect();
     
-    const query = `DELETE FROM products WHERE id = "${id}";`;
+    const query = `DELETE FROM products WHERE id = ?;`;
     console.log(`Executando query: ${query}`);
 
-    await connection.execute(query);
+    await connection.execute(query,[id]);
 }
 
 async function insertProduct(name, description, value){
     const conn = await connect();
 
-    const query = `INSERT INTO products(id, name, description, value) VALUES ("${randomUUID()}", "${name}", "${description}", ${value});`;
+    const query = `INSERT INTO products(id, name, description, value) VALUES (?, ?, ?, ?);`;
     console.log(`Executando query: ${query}`);
 
     try{
-        await connection.execute(query);
+        await connection.execute(query,[randomUUID(), name, description, value]);
     }catch(err){
         if(err.errno === 1062){
             throw {code: 400, message: 'Já existe um produto cadastrado com este nome!'};

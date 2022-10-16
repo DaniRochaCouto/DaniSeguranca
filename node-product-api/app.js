@@ -12,7 +12,7 @@ var RateLimit = require('express-rate-limit');
 
 var limiter = new RateLimit({
     windowMs: 15*60*1000,
-    max: 4,
+    max: 40,
     delayMs: 0,
     message: "Too many accounts created from this IP, please try again after an hour"
 });
@@ -41,7 +41,7 @@ app.post('/products', async (req, res, next) => {
         var value = req.body.value
         
         await db.insertProduct(name, description, value);
-        return res.status(200).json({message: 'Esse Produto cadastrado com sucesso!'});
+        return res.status(200).json({message: 'Produto cadastrado com sucesso!'});
 
     }catch(err){
         //return res.status(err.code).json(err);
