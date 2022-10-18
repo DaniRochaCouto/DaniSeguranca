@@ -8,6 +8,17 @@ const db = require("./db");
 
 var cookieParser = require('cookie-parser'); 
 const bodyParser = require('body-parser');
+var https = require('https');
+var fs = require('fs');
+var privateKey  = fs.readFileSync('./sslcert/selfsigned.key', 'utf8');
+var certificate = fs.readFileSync('./sslcert/selfsigned.crt', 'utf8');
+
+var credentials = {key: privateKey, cert: certificate};
+
+var httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(3001);
+
 var RateLimit = require('express-rate-limit');
 
 var limiter = new RateLimit({
@@ -44,7 +55,7 @@ app.post('/products', async (req, res, next) => {
         return res.status(200).json({message: 'Produto cadastrado com sucesso!'});
 
     }catch(err){
-        //return res.status(err.code).json(err);
+        return res.status(err.code).json(err);
         next(err);
     }
 });
@@ -100,9 +111,9 @@ app.delete('/products/:id', async (req, res, next) => {
 });
 
 
-app.listen(port, () => {
-    console.log(`Listening at http://localhost:${port}`)
-});
+//app.listen(port, () => {
+    console.log(`Listening at https://localhost:${port}`);
+//});
 /* Error handler middleware */
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
